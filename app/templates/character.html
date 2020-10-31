@@ -1,0 +1,26 @@
+
+
+<h2>
+        {{data.page}}
+        {% for d in data.data %}
+            <table>
+                <td>{{d.name}}</td>
+                <td>{{d.gender}}</td>
+                <td>{{d.height}}</td>
+                <td>{{d.weight}}</td>
+            </table>
+
+        {% endfor %}
+        {% if data.page >= 10 %}
+        <form method ="get" action="/characters">
+            <input type="hidden" name='page', value={{data.page}}>
+            <button type="submit" name="prev" value=10> prev </button>
+            <button type="submit" name="next" value=10> next </button>
+        </form> 
+        {% else %}
+        <form method ="get" action="/characters">
+            <input type="hidden" name='page', value={{data.page}}>
+            <button type="submit" name="next" value=10> next </button>
+        </form>         
+        {% endif %}
+</h2>
