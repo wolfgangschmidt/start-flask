@@ -1,10 +1,6 @@
-FROM python:3
+FROM tiangolo/uwsgi-nginx-flask:python3.8
 
-COPY . /views
-WORKDIR /views
+COPY ./app /app
 
-RUN pip install -r requirements.txt
-
-ENTRYPOINT ["python3"]
-
-CMD ["views.py"]
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt
