@@ -1,19 +1,22 @@
 from flask import Flask, render_template
+import sys
 import requests
 import json
 from flask import request
 from api_data import get_char_data, get_ship_data
-import test_data
-import test_data_ships
+from tests.test import get_test
+
+
 app = Flask(__name__)
 
+#these global variables are for speed
 
-#SHIPS = get_ship_data()
-#CHARACTERS = get_char_data()
+SHIPS = get_ship_data()
+CHARACTERS = get_char_data()
 
-def get_test():
+FILTER = None
+FILTER_KEY = None
 
-    return test_data, test_data_ships
 
 def get_starwars_data(api_type, next_page=None):
 
@@ -26,56 +29,89 @@ def get_starwars_data(api_type, next_page=None):
 
     return data
 
+
 @app.route('/')
 def index_view():
 
     return render_template('index.html')
 
+
 @app.route('/characters')
 def char_view():
+
     page = 0
     try:
         _next = int(request.args.get('next')) if request.args.get('next') else None
         _prev = int(request.args.get('prev')) if request.args.get('prev') else None
         current = int(request.args.get('page')) if request.args.get('page') else 0
+
+        for key in ['films', 'homeworld', 'starship', 'vehicles']:
+            filters = request.args.get(key)
+            if filters:
+                global FILTER_KEY
+                FILTER_KEY = key
+                global FILTER
+                FILTER = filters.replace('_', ' ')
+                break                
+
         if _next:
             page = current + _next
         if _prev:
              page = current - _prev
     except:
-        return render_template('character.html', data={'data':{'Error': "this is Unatural"}})
+        pass
 
-    data = get_test()[0]
+    data = CHARACTERS
+
     if data:
-        data_list, page = parse_char_data(data, None, page)
-    return render_template('character.html', data={'data':data_list, 'page': page})
+        data_list, page, filters = parse_char_data(data, None, page)
+        return render_template('character.html', 
+                                    data={
+                                        'data':data_list, 
+                                        'page': page, 
+                                        'filters': filters, 
+                                        "current_filter": FILTER
+                                        }
+                               )
+    return render_template('character.html', data={'data':{'Error': "this is Unatural", 'filters': None}})
 
 
 @app.route('/ships')
 def ship_view():
 
-    data = get_test()[1]
-    if data:
-        data = parse_ship_data(data)
+    data = sorted(SHIPS, key = lambda i: (i['drive']), reverse=False)
     return render_template('ships.html', data={'data':data})
 
 
 
 def parse_char_data(data, filters=None, start=0):
-    ordered_list = sorted(data.data, key = lambda i: (i['name'], 
+    ordered_list = sorted(data, key = lambda i: (i['name'], 
                                                       i['gender'], 
                                                       i['weight'], 
                                                       i['height']))
-    if filters:
-        ordered_list = [x for x in ordered_list if filters in x]
-    return ordered_list[start: start+10], start
+    filters_options = get_filters(ordered_list)
+    if FILTER and FILTER_KEY:
+        ordered_list = [x for x in ordered_list if FILTER in x[FILTER_KEY]]
+    return ordered_list[start: start+10], start, filters_options
 
 
-def parse_ship_data(data):
-    data_list =  []
-    data_list = get_test()[1].data
+def get_filters(data_lists):
 
-    return sorted(data_list, key = lambda i: (i['rating']), reverse=True)
+    filters = {'films': [], 'homeworlds': [], 'starships': [], 'vehicles': []}
+    films = [x['films'] for x in data_lists]
+    homeworld = [x['homeworld'] for x in data_lists]
+    starship = [x['starship'] for x in data_lists]
+    vehicles = [x['vehicles'] for x in data_lists]
+    for key, values in {'films': films,  
+            'starships': starship, 
+            'vehicles': vehicles}.items():
+        for items  in values:
+            for item in items:
+                new_item = item.replace(' ', '_')
+                filters[key].append(new_item)
+        filters[key] = list(set(filters[key]))
+    filters['homeworlds'] = list(set(homeworld))
+    return filters
 
 
 if __name__ == '__main__':

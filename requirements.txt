@@ -13,4 +13,5 @@ urllib3==1.25.8
 virtualenv==20.0.30
 webencodings==0.5.1
 Werkzeug==1.0.1
-jinja
+jinja2
+mock

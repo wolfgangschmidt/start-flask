@@ -3,12 +3,10 @@ import requests
 
 
 def get_char_data():
-    char_data_list = []
     total = []
     page = requests.get('https://swapi.dev/api/people/').json()
     while "next" in page:
         result = page['results']
-        page_data = []
         for res in result:
             char_dict = {}
             char_dict['name'] = res['name']
@@ -25,6 +23,7 @@ def get_char_data():
                 char_dict['films'].append(requests.get(films).json()['title'])
             for vehicles in res['vehicles']:
                 char_dict['vehicles'].append(requests.get(vehicles).json()['name'])
+            char_dict['homeworld'] = requests.get(vehicles).json()['name']
             total.append(char_dict)
         try:
             page = requests.get(page['next']).json()
@@ -44,11 +43,18 @@ def get_ship_data():
             ship_dict = {}
             ship_dict['name'] = ship['name']
             ship_dict['class'] = ship['starship_class']
-            ship_dict['cost'] = ship['cost_in_credits']
             try:
-                ship_dict['rating'] = float(ship['hyperdrive_rating']) / float(ship['cost_in_credits'])
+                ship_dict['cost'] = int(ship['cost_in_credits'])
             except:
-                ship_dict['rating'] = 0
+                ship_dict['cost'] = None
+            try:
+                drive = float(ship['hyperdrive_rating'])
+            except:
+                drive = None
+            try:
+                ship_dict['rating'] = round(drive / float(ship_dict['cost']), 4)
+            except:
+                ship_dict['rating'] = None
             ship_dict['drive'] = ship['hyperdrive_rating']
 
             ship_data_list.append(ship_dict)
