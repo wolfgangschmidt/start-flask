@@ -11,8 +11,8 @@ app = Flask(__name__)
 
 #these global variables are for speed
 
-SHIPS = get_ship_data()
-CHARACTERS = get_char_data()
+#SHIPS = get_ship_data()
+#CHARACTERS = get_char_data()
 
 FILTER = None
 FILTER_KEY = None
@@ -38,7 +38,8 @@ def index_view():
 
 @app.route('/characters')
 def char_view():
-
+    global CHARACTERS
+    CHARACTERS = get_char_data()
     page = 0
     try:
         _next = int(request.args.get('next')) if request.args.get('next') else None
@@ -78,7 +79,8 @@ def char_view():
 
 @app.route('/ships')
 def ship_view():
-
+    global SHIPS
+    SHIPS = get_ship_data()
     data = sorted(SHIPS, key = lambda i: (i['drive']), reverse=False)
     return render_template('ships.html', data={'data':data})
 

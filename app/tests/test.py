@@ -11,8 +11,8 @@ def get_test():
 @patch('views.get_char_data')
 @patch('views.get_ship_data')
 def test_index(_SHIP, _CHARACTER, app, client):
-    _SHIP.return_value = get_test()[0]
-    _CHARACTER.return_value = get_test()[1]
+    _SHIP.return_value = get_test()[1]
+    _CHARACTER.return_value = get_test()[0]
     res = client.get('/')
     assert res.status_code == 200
 
@@ -20,8 +20,8 @@ def test_index(_SHIP, _CHARACTER, app, client):
 @patch('views.get_char_data')
 @patch('views.get_ship_data')
 def test_ships(_SHIP, _CHARACTER, app, client):
-    _SHIP.return_value = get_test()[0]
-    _CHARACTER.return_value = get_test()[1]
+    _SHIP.return_value = get_test()[1]
+    _CHARACTER.return_value = get_test()[0]
     res = client.get('/ships')
     assert res.status_code == 200
 
@@ -29,7 +29,7 @@ def test_ships(_SHIP, _CHARACTER, app, client):
 @patch('views.get_char_data')
 @patch('views.get_ship_data')
 def test_characters(_SHIP, _CHARACTER, app, client):
-    _SHIP.return_value = get_test()[0]
-    _CHARACTER.return_value = get_test()[1]
+    _SHIP.return_value = get_test()[1]
+    _CHARACTER.return_value = get_test()[0]
     res = client.get('/characters')
     assert res.status_code == 200
