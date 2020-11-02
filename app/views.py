@@ -38,8 +38,12 @@ def index_view():
 
 @app.route('/characters')
 def char_view():
-    global CHARACTERS
-    CHARACTERS = get_char_data()
+    if 'pytest' not in sys.modules:
+        global CHARACTERS
+        CHARACTERS = get_char_data()
+    else:
+        CHARACTERS = get_test()[0]
+
     page = 0
     try:
         _next = int(request.args.get('next')) if request.args.get('next') else None
