@@ -9,25 +9,11 @@ from tests.test import get_test
 
 app = Flask(__name__)
 
-#these global variables are for speed
-
-#SHIPS = get_ship_data()
-#CHARACTERS = get_char_data()
+#these global variables are for speed and keep filters
 
 FILTER = None
 FILTER_KEY = None
 
-
-def get_starwars_data(api_type, next_page=None):
-
-    default_page = {"people": 'https://swapi.dev/api/people/', 
-                    'starships': 'https://swapi.dev/api/starship/'}
-    if not next_page:
-        next_page = default_page[api_type]
-
-    data = requests.get(next_page)
-
-    return data
 
 
 @app.route('/')
@@ -38,13 +24,9 @@ def index_view():
 
 @app.route('/characters')
 def char_view():
-    if 'pytest' not in sys.modules:
-        global CHARACTERS
-        CHARACTERS = get_char_data()
-    else:
-        CHARACTERS = get_test()[0]
 
     page = 0
+    
     try:
         _next = int(request.args.get('next')) if request.args.get('next') else None
         _prev = int(request.args.get('prev')) if request.args.get('prev') else None
@@ -66,7 +48,9 @@ def char_view():
     except:
         pass
 
-    data = CHARACTERS
+    # this is for speed, due too timeout on servers this loads the character data
+    # pre obtained from api.
+    data = get_test()[0]
 
     if data:
         data_list, page, filters = parse_char_data(data, None, page)
